@@ -1,0 +1,1 @@
+This is the NLP project that I carried out for a company in Alto-adige region.
