@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLP Order Processing Dashboard</title>
+    <!-- Premium Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- Sidebar Navigation & Controls -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <i class="fa-solid fa-brain-circuit logo-icon"></i>
+                <div class="logo-text">
+                    <h1>Antigravity</h1>
+                    <span>NLP Order Pipeline</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-btn active" id="tab-review-btn">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Review Workspace</span>
+                    <span class="badge" id="problematic-count-badge">0</span>
+                </button>
+                <button class="nav-btn" id="tab-orders-btn">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>All Orders</span>
+                </button>
+                <button class="nav-btn" id="tab-console-btn">
+                    <i class="fa-solid fa-terminal"></i>
+                    <span>Pipeline Console</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- RL Weights Status Card -->
+            <div class="rl-weights-card">
+                <h3><i class="fa-solid fa-sliders"></i> RL Model Weights</h3>
+                <div class="updates-label" id="rl-updates">0 updates</div>
+                <div class="weight-item">
+                    <span>Exact Code</span>
+                    <div class="weight-bar-bg">
+                        <div class="weight-bar" id="w-exact" style="width: 0%"></div>
+                    </div>
+                    <span class="weight-val" id="v-exact">0.00</span>
+                </div>
+                <div class="weight-item">
+                    <span>Fuzzy Desc</span>
+                    <div class="weight-bar-bg">
+                        <div class="weight-bar" id="w-fuzzy" style="width: 0%"></div>
+                    </div>
+                    <span class="weight-val" id="v-fuzzy">0.00</span>
+                </div>
+                <div class="weight-item">
+                    <span>Trigram</span>
+                    <div class="weight-bar-bg">
+                        <div class="weight-bar" id="w-trigram" style="width: 0%"></div>
+                    </div>
+                    <span class="weight-val" id="v-trigram">0.00</span>
+                </div>
+                <div class="weight-item">
+                    <span>Blocked Pen</span>
+                    <div class="weight-bar-bg">
+                        <div class="weight-bar blocked-bar" id="w-blocked" style="width: 0%"></div>
+                    </div>
+                    <span class="weight-val" id="v-blocked">0.00</span>
+                </div>
+            </div>
+
+            <!-- Run Pipeline Control -->
+            <div class="run-pipeline-area">
+                <button class="btn btn-primary" id="run-pipeline-btn">
+                    <i class="fa-solid fa-play"></i> Run NLP Pipeline
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Application Workspace -->
+        <main class="main-content">
+
+            <!-- Top Dashboard Stats Header -->
+            <header class="dashboard-header">
+                <div class="stat-card">
+                    <div class="stat-icon icon-blue"><i class="fa-solid fa-file-invoice"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Orders</h3>
+                        <p id="stat-total-orders">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon icon-yellow"><i class="fa-solid fa-circle-question"></i></div>
+                    <div class="stat-info">
+                        <h3>Items Needs Review</h3>
+                        <p id="stat-review-items">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon icon-green"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="stat-info">
+                        <h3>Confidence Auto-Pass</h3>
+                        <p id="stat-accuracy">0%</p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- SECTION 1: REVIEW WORKSPACE -->
+            <section class="content-section active" id="section-review">
+                <div class="section-title-bar">
+                    <h2><i class="fa-solid fa-triangle-exclamation color-yellow"></i> Problematic Outcomes</h2>
+                    <p class="subtitle">Review matched catalog items with confidence &lt; 1.00. Train the RL agent by
+                        accepting or rejecting choices.</p>
+                </div>
+
+                <div class="workspace-split">
+                    <!-- Left: Problematic Matches List -->
+                    <div class="items-list-pane">
+                        <div class="pane-header">
+                            <span class="title">Uncertain Items</span>
+                            <span class="count" id="uncertain-items-count">0 items</span>
+                        </div>
+                        <div class="items-list" id="uncertain-items-list">
+                            <!-- Populated by JavaScript -->
+                            <div class="empty-state">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <p>No problematic outcomes detected!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Review and Verification Workspace -->
+                    <div class="detail-pane" id="detail-review-pane">
+                        <!-- Default placeholder -->
+                        <div class="pane-placeholder" id="pane-placeholder">
+                            <i class="fa-solid fa-magnifying-glass-arrow-right"></i>
+                            <p>Select an item from the left pane to review details</p>
+                        </div>
+
+                        <!-- Detail Workspace (Hidden initially) -->
+                        <div class="pane-details hidden" id="pane-details-content">
+                            <!-- Detail Header -->
+                            <div class="detail-header">
+                                <div>
+                                    <h3 id="detail-customer-code">Customer: -</h3>
+                                    <span class="detail-order-label" id="detail-order-label">Order: -</span>
+                                </div>
+                                <div class="conf-badge-wrapper">
+                                    <span class="conf-score-label">Confidence</span>
+                                    <div class="conf-badge" id="detail-conf-badge">0.00</div>
+                                </div>
+                            </div>
+
+                            <!-- Media Viewer Section -->
+                            <div class="detail-section">
+                                <h4><i class="fa-solid fa-paperclip"></i> Original Order Source</h4>
+                                <div class="media-preview-box" id="media-preview-box">
+                                    <!-- Dynamic content -->
+                                </div>
+                            </div>
+
+                            <!-- Match Comparison -->
+                            <div class="detail-section">
+                                <h4><i class="fa-solid fa-code-compare"></i> Pipeline Mapping Comparison</h4>
+                                <div class="comparison-grid">
+                                    <div class="compare-card gemini-card">
+                                        <div class="card-header-label"><i class="fa-solid fa-microchip"></i> Gemini
+                                            Output</div>
+                                        <div class="compare-field">
+                                            <label>Extracted Code</label>
+                                            <span class="compare-val" id="gemini-code-val">-</span>
+                                        </div>
+                                        <div class="compare-field">
+                                            <label>Extracted Description</label>
+                                            <span class="compare-val text-large" id="gemini-desc-val">-</span>
+                                        </div>
+                                        <div class="compare-field">
+                                            <label>Ordered Pieces</label>
+                                            <span class="compare-val" id="gemini-pieces-val">-</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="compare-card catalog-card">
+                                        <div class="card-header-label"><i class="fa-solid fa-book"></i> Catalog Match
+                                        </div>
+                                        <div class="compare-field">
+                                            <label>Matched Code</label>
+                                            <span class="compare-val font-accent" id="match-code-val">-</span>
+                                        </div>
+                                        <div class="compare-field">
+                                            <label>Matched Description</label>
+                                            <span class="compare-val text-large" id="match-desc-val">-</span>
+                                        </div>
+                                        <div class="compare-field">
+                                            <label>Unit / PC Per Unit</label>
+                                            <span class="compare-val" id="match-unit-val">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Decision Metrics -->
+                            <div class="detail-section metrics-section">
+                                <h4><i class="fa-solid fa-chart-simple"></i> Match Telemetry</h4>
+                                <div class="metrics-grid">
+                                    <div class="metric-item">
+                                        <span class="metric-lbl">Fuzzy Similarity</span>
+                                        <span class="metric-val" id="metric-fuzzy">0.00</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-lbl">Trigram Score</span>
+                                        <span class="metric-val" id="metric-trigram">0.00</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-lbl">Match Method</span>
+                                        <span class="metric-val" id="metric-method">-</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-lbl">RL Recommendation</span>
+                                        <span class="metric-val" id="metric-rl">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Feedback Buttons -->
+                            <div class="action-buttons-bar">
+                                <button class="btn btn-success" id="btn-feedback-accept">
+                                    <i class="fa-solid fa-circle-check"></i> Accept Match
+                                </button>
+                                <button class="btn btn-danger" id="btn-feedback-reject">
+                                    <i class="fa-solid fa-circle-xmark"></i> Reject Match
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: ALL ORDERS -->
+            <section class="content-section" id="section-orders">
+                <div class="section-title-bar">
+                    <h2><i class="fa-solid fa-list-check color-blue"></i> Processed Pipeline Orders</h2>
+                    <p class="subtitle">Complete history of all processed orders and mapping outputs.</p>
+                </div>
+
+                <div class="orders-table-card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Source Files</th>
+                                <th>Customer</th>
+                                <th>Total Items</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION 3: PIPELINE CONSOLE -->
+            <section class="content-section" id="section-console">
+                <div class="section-title-bar">
+                    <h2><i class="fa-solid fa-terminal color-green"></i> Pipeline Console Logs</h2>
+                    <p class="subtitle">Real-time log trace streaming from the `def2.py` extraction engine subprocess.
+                    </p>
+                </div>
+
+                <div class="console-wrapper">
+                    <div class="console-header">
+                        <span class="console-title"><i class="fa-solid fa-microchip"></i> Gemini Engine Subprocess
+                            Console</span>
+                        <div class="console-actions">
+                            <span class="console-status" id="console-status-indicator">Idle</span>
+                            <button class="btn btn-secondary btn-sm" id="clear-console-btn">
+                                <i class="fa-solid fa-trash-can"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                    <div class="console-body" id="console-output">
+                        <div class="console-line system-msg">Console ready. Click "Run NLP Pipeline" to execute the
+                            parsing pipeline.</div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modal for Order JSON Detail View -->
+    <div class="modal hidden" id="order-detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Order Details</h3>
+                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body-content">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Scripts -->
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

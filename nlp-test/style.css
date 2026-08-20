@@ -1,0 +1,86 @@
+/* style.css */
+:root {
+    --primary-bg: #0a1f44; /* deep dark blue */
+    --card-bg: rgba(255, 255, 255, 0.1);
+    --card-blur: 10px;
+    --text-color: #e0eaff;
+    --accent-color: #4da6ff;
+    --highlight-scale: 1.2;
+    --transition: 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background: var(--primary-bg);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+}
+
+header h1 {
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    text-align: center;
+    color: var(--accent-color);
+}
+
+#city-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.city-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(var(--card-blur));
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    transition: transform var(--transition), box-shadow var(--transition);
+    cursor: pointer;
+    position: relative;
+}
+
+.city-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.city-card.highlight {
+    transform: scale(var(--highlight-scale));
+    border: 2px solid var(--accent-color);
+}
+
+.city-name {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.temperature {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.updated-time {
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+    opacity: 0.8;
+}
+
+@media (max-width: 600px) {
+    header h1 {font-size: 1.5rem;}
+    .city-card.highlight {transform: scale(1.1);}
+}
